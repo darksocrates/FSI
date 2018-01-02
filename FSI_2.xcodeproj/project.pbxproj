@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		415D371B1FFB08A100F3746F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 415D371A1FFB08A100F3746F /* main.cpp */; };
+		415D37231FFB098600F3746F /* SpectralProj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 415D37221FFB098600F3746F /* SpectralProj.cpp */; settings = {ASSET_TAGS = (); }; };
+		415D37251FFB0AF400F3746F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 415D37241FFB0AF400F3746F /* main.cpp */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +25,9 @@
 
 /* Begin PBXFileReference section */
 		415D37171FFB08A100F3746F /* FSI_2 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FSI_2; sourceTree = BUILT_PRODUCTS_DIR; };
-		415D371A1FFB08A100F3746F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		415D37211FFB098600F3746F /* SpectralProj.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SpectralProj.hpp; sourceTree = "<group>"; };
+		415D37221FFB098600F3746F /* SpectralProj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SpectralProj.cpp; sourceTree = "<group>"; };
+		415D37241FFB0AF400F3746F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,7 +44,9 @@
 		415D370E1FFB08A100F3746F = {
 			isa = PBXGroup;
 			children = (
-				415D37191FFB08A100F3746F /* FSI_2 */,
+				415D37241FFB0AF400F3746F /* main.cpp */,
+				415D37211FFB098600F3746F /* SpectralProj.hpp */,
+				415D37221FFB098600F3746F /* SpectralProj.cpp */,
 				415D37181FFB08A100F3746F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,14 +57,6 @@
 				415D37171FFB08A100F3746F /* FSI_2 */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		415D37191FFB08A100F3746F /* FSI_2 */ = {
-			isa = PBXGroup;
-			children = (
-				415D371A1FFB08A100F3746F /* main.cpp */,
-			);
-			path = FSI_2;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -118,7 +115,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				415D371B1FFB08A100F3746F /* main.cpp in Sources */,
+				415D37251FFB0AF400F3746F /* main.cpp in Sources */,
+				415D37231FFB098600F3746F /* SpectralProj.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -205,6 +203,8 @@
 		415D371F1FFB08A100F3746F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/Cellar/eigen/3.3.4/include/eigen3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -212,6 +212,8 @@
 		415D37201FFB08A100F3746F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				HEADER_SEARCH_PATHS = /usr/local/Cellar/eigen/3.3.4/include/eigen3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
