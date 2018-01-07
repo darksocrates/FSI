@@ -7,9 +7,15 @@
 //
 
 #include <iostream>
+#include "SpectralProj.hpp"
 
 int main(int argc, const char * argv[]) {
 
+    Filter test(12);
+    test.center = std::complex<double>(1,1); test.radius = 2.0;
+    
+    test.circ_trapez_snug();
+    std::cout<<test.gettranslation()<<"\n" <<test.getweights()<<"\n";
     
     
     return 0;
