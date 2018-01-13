@@ -49,11 +49,14 @@ typedef Eigen::Matrix<std::complex<double>,Eigen::Dynamic,Eigen::Dynamic> Matrix
 typedef Eigen::Matrix<std::complex<double>,Eigen::Dynamic, 1> VectorXcd;
 
 class Span {
+protected:
+    
+    //n is the number of 'columns' in the Span
+ unsigned int n;
     
 private:
-//internal values used in the methods. m corresponds to the number of rows in the Span, n is the number of columns. Verbose is designater used to determine when to print various things when methods are called. err is a string that holds the standard error message to display for functions that are optional to override in a derived class (they are not pure virtual functions), but do not have any meaning here.
+//err is a string that holds the standard error message to display for functions that are optional to override in a derived class (they are not pure virtual functions), but do not have any meaning here.
     
-    unsigned int m,n;
     std::string err = "Function not implemented in derived class, base Span function called";
 
     
@@ -64,6 +67,8 @@ public:
 //The following functions have a sensible definition so do not require overriding in a derived class.
     
      void prnt(std::string str);
+    
+     unsigned int numcolumns(){return n;}
     
 //The following functions must be implemented by derived classes
     
@@ -76,17 +81,19 @@ public:
     virtual void operator * (MatrixXcd) = 0;
     /* implement the actions of the span object times an Eigen matrix of complex doubles */
 
-    //NOTE couldn't I just have this function have a return type of a Span object, therefore no assumptions are made on how the underlying span is represented? YEAH DUMBASS YOU CAN!!!! - LATE NIGHT AIDAN
-
-    template<typename Derived>
-    std::complex<double> innerproduct(const Eigen::MatrixBase<Derived>& u, const Eigen::MatrixBase<Derived>& v);
-    /* required implementation of inner product for two members in the underlying space of the Span, output is assumed to be complex. This function assumes that they underlying space of the span is represented by an Matrix (Vector) from the Eigen library.*/
+    virtual std::complex<double> operator *(Span *u) =0;
+    /* required implementation of inner product for two members in the underlying space of the Span, output is assumed to be complex.*/
+    
+    virtual std::string whatareyou() = 0;
+    /*Derived classes must implement this functions, which expects to return a string saying what the derived class is. This is to allow some way for a user to from a Span pointer, which can be pointing to some unknown derived class of Span, query what derived class of Span they are working with (ie an L2 span, H1 span C1 span etc etc) */
     
 };
 
 
 
 //implements the filters for filtered subspace iteration in its methods. This is seperated from the class Spectralproj for readability
+// This class will also implement all of the 'discretization' of the eigenvalues search set. Ie. it will decide how many seperate fsi algorithms to run
+
 
 //all methods must write to the internal complex weights, complex translations and number of points in the filter (n) variables.
 
@@ -103,6 +110,7 @@ public:
     
     // filter methods
     void circ_trapez_snug();
+    void setn(unsigned int n); 
     
     // quality of life methods
     void prnt(std::string str);
@@ -119,18 +127,74 @@ public:
 };
 
 
-class Spectralproj {
+/* Class that holds the data returned by FSI, implemented as a class and not a structure to allow for the addition of methods for plotting and etc, to ease routine tasks that would be done with the data. Also lets me screw with how the data is actually stored internally without effecting any current code using this. Fields can only be set via a constructor or via the read method.*/
+
+class FSI_data {
 private:
+    /* fields, all are private so that the user can't accidently screw with them. */
+    
+    // pointer to a span object, will be the same pointer that is inputted into the fsi algorithm
+    Span *span;
+    //Eigen Matrix containing the ritzvalues for each iteration indexed from top to bottom.
+    MatrixXcd eigenvalues;
+    //Eigen Matrix containing the residuals (if calculated), along with boolean to track if the residual is calculated, defaults to not.
+    Eigen::MatrixXd residual; bool residual_calculated = false;
+    
+    //String that contains the result of the whatareyou() function the of particular Spectral projector that called this particular instance of FSI data in its fsi function.
+    std::string spectralproj_type;
+    
+public:
+    /*access methods to the private data*/
+    //NOTE: add user protections to check if the various fields have actually been declared or not.
+    
+    MatrixXcd geteigenvalues() {return eigenvalues;}
+    
+    Eigen::MatrixXd getresidual(){if (residual_calculated == false){
+        throw "residual was not calculated, there is no residual data here";
+    } else {
+        return residual;
+    } }
+    
+    //labeled explictly as Span pointer to make clear that you are getting a pointer to a Span object
+    Span* getSpan_pointer(){return span;}
+    
+    std::string getSpectralproj_name(){return spectralproj_type;}
+    
+    /* Constructors*/
+    
+    FSI_data(MatrixXcd eigenvalues, Span *span, std::string spectralproj_type);
+    
+    FSI_data(MatrixXcd eigenvalues, Span *span, std::string spectralproj_type, Eigen::MatrixXd residual);
+    
+    
+    
+    //Quality of life methods to implement!!!!!
+    // -  plot function(s), generalized one and short hands for the common requests.
+    //though with the below implemented you could easily just import the saved data into matlab and have a set script created for plotting, as a tempory measure
+    
+    //NOTE: to implement, save function, writes the data to a text file in a sensible labeled format.
+    //NOTE: to implement, read function, reads the data in the above sensible format to and instance of this class.
+    
+    
+};
+
+
+class Spectralproj {
+protected:
     
 public:
     //fields
-    bool verbose = 0; Filter filter;
+    bool verbose = 0; Filter *filter;
     
     //quality of life methods
-    void prnt(std::string str); 
+    void prnt(std::string str);
     
     
     //the following methods must be implemented by derived classes
+    
+    
+    virtual std::string whatareyou() = 0;
+    /*Method to on query return string saying what type of spectral projector you are, used to allow more polymorphism behavior in applications*/
     
     //mult corrresponds with the action of the approximate spectral projection operator on a pointer to a Span. Alters the given span object.
     
@@ -151,12 +215,13 @@ public:
     
 /* ASSUMING THAT ABOVE METHODS ARE AVAILABLE AND SPAN IS PROPERLY BUILT THIS IS THE FSI (or FEAST) ALGORITHM */
     
-   VectorXcd feast_step_hermitian(Span *q);
+VectorXcd fsi_step_hermitian(Span *q);
     /* Perform one step of the FSI algorithm  assuming that the operator is self-adjoint. Takes a pointer to a span as an input and returns a  Eigen vector than contains the ritzvalues and edits the given Span object to be the span after the spectral projector has been applied */
     
-    
-    
+    //NOTE: currently implemented with restart
+    FSI_data fsi_hermitian(Span *q, double stop_tol = 1e-9,double eigen_fudge = 1e-9, unsigned int maxiterations = 10, bool report_residuals = false);
     
 };
+
 
 #endif /* SpectralProj_hpp */

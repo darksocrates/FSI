@@ -237,6 +237,7 @@
 				415D37201FFB08A100F3746F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
