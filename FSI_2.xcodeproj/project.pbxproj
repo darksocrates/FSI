@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		415D37231FFB098600F3746F /* SpectralProj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 415D37221FFB098600F3746F /* SpectralProj.cpp */; settings = {ASSET_TAGS = (); }; };
 		415D37251FFB0AF400F3746F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 415D37241FFB0AF400F3746F /* main.cpp */; settings = {ASSET_TAGS = (); }; };
+		41FACE00200AC9FE00C924B0 /* Filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 41FACDFE200AC9FE00C924B0 /* Filter.cpp */; settings = {ASSET_TAGS = (); }; };
+		41FACE03200B169200C924B0 /* Typedefs_statics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 41FACE01200B169200C924B0 /* Typedefs_statics.cpp */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +30,10 @@
 		415D37211FFB098600F3746F /* SpectralProj.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SpectralProj.hpp; sourceTree = "<group>"; };
 		415D37221FFB098600F3746F /* SpectralProj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SpectralProj.cpp; sourceTree = "<group>"; };
 		415D37241FFB0AF400F3746F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		41FACDFE200AC9FE00C924B0 /* Filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Filter.cpp; sourceTree = "<group>"; };
+		41FACDFF200AC9FE00C924B0 /* Filter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Filter.hpp; sourceTree = "<group>"; };
+		41FACE01200B169200C924B0 /* Typedefs_statics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Typedefs_statics.cpp; sourceTree = "<group>"; };
+		41FACE02200B169200C924B0 /* Typedefs_statics.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Typedefs_statics.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +51,10 @@
 			isa = PBXGroup;
 			children = (
 				415D37241FFB0AF400F3746F /* main.cpp */,
+				41FACDFF200AC9FE00C924B0 /* Filter.hpp */,
+				41FACDFE200AC9FE00C924B0 /* Filter.cpp */,
+				41FACE01200B169200C924B0 /* Typedefs_statics.cpp */,
+				41FACE02200B169200C924B0 /* Typedefs_statics.hpp */,
 				415D37211FFB098600F3746F /* SpectralProj.hpp */,
 				415D37221FFB098600F3746F /* SpectralProj.cpp */,
 				415D37181FFB08A100F3746F /* Products */,
@@ -116,7 +126,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				415D37251FFB0AF400F3746F /* main.cpp in Sources */,
+				41FACE00200AC9FE00C924B0 /* Filter.cpp in Sources */,
 				415D37231FFB098600F3746F /* SpectralProj.cpp in Sources */,
+				41FACE03200B169200C924B0 /* Typedefs_statics.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

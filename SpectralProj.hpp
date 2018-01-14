@@ -40,13 +40,11 @@
 #include <cmath>
 #include <tuple>
 #include <Eigen/Eigenvalues>
+#include <vector>
+#include "Filter.hpp"
+#include"Typedefs_statics.hpp"
 
 
-const static double pi =3.14159265358979323846;
-const static std::complex<double> onei(0,1);
-
-typedef Eigen::Matrix<std::complex<double>,Eigen::Dynamic,Eigen::Dynamic> MatrixXcd;
-typedef Eigen::Matrix<std::complex<double>,Eigen::Dynamic, 1> VectorXcd;
 
 class Span {
 protected:
@@ -72,11 +70,18 @@ public:
     
 //The following functions must be implemented by derived classes
     
+    //the following two methods are used heavily in the FSI_data class
+        virtual void store(std::string path) = 0;
+        /*method to store the contents of the span in a user specified format at the location specified by path */
+    
+        virtual void load(std::string path) = 0;
+        /*method to load the given span object with the contents dumped to the file given by path. Assumed that the file given by path stores the contents of a span object in the same format as teh store method would*/
+    
     virtual void orthagonalize() = 0;
     /* replace the current span by an orthagonal span in a suitable H space */
     
-    virtual void remove(unsigned int *cut[]) =0;
-    /* remove vectors with indices given by the array cut*/
+    virtual void remove(unsigned int *cut) =0;
+    /* remove vectors with indices given by the array cut */
     
     virtual void operator * (MatrixXcd) = 0;
     /* implement the actions of the span object times an Eigen matrix of complex doubles */
@@ -91,41 +96,6 @@ public:
 
 
 
-//implements the filters for filtered subspace iteration in its methods. This is seperated from the class Spectralproj for readability
-// This class will also implement all of the 'discretization' of the eigenvalues search set. Ie. it will decide how many seperate fsi algorithms to run
-
-
-//all methods must write to the internal complex weights, complex translations and number of points in the filter (n) variables.
-
-class Filter {
-private:
-    unsigned int n = 0;
-    //NOTE: see if you can figure out a way to change this to a static Matrix. Would be preferable for efficiency
-    VectorXcd weights,translation;
-public:
-    //fields
-    bool verbose = 0; double radius; std::complex<double> center;
-    
-    //methods
-    
-    // filter methods
-    void circ_trapez_snug();
-    void setn(unsigned int n); 
-    
-    // quality of life methods
-    void prnt(std::string str);
-    void string_call(std::string filter);
-    
-    //return private fields methods
-    VectorXcd getweights(){return weights;}
-    VectorXcd gettranslation(){return translation;}
-    
-    //Constructors
-    Filter(unsigned int n);
-    
-    Filter(unsigned int n, std::string filter);
-};
-
 
 /* Class that holds the data returned by FSI, implemented as a class and not a structure to allow for the addition of methods for plotting and etc, to ease routine tasks that would be done with the data. Also lets me screw with how the data is actually stored internally without effecting any current code using this. Fields can only be set via a constructor or via the read method.*/
 
@@ -136,9 +106,9 @@ private:
     // pointer to a span object, will be the same pointer that is inputted into the fsi algorithm
     Span *span;
     //Eigen Matrix containing the ritzvalues for each iteration indexed from top to bottom.
-    MatrixXcd eigenvalues;
-    //Eigen Matrix containing the residuals (if calculated), along with boolean to track if the residual is calculated, defaults to not.
-    Eigen::MatrixXd residual; bool residual_calculated = false;
+    std::vector<VectorXcd> eigenvalues;
+    //std::vector<Eigen::VectorXd> containing the residuals (if calculated), along with boolean to track if the residual is calculated, defaults to not.
+    std::vector<Eigen::VectorXd> residual; bool residual_calculated = false;
     
     //String that contains the result of the whatareyou() function the of particular Spectral projector that called this particular instance of FSI data in its fsi function.
     std::string spectralproj_type;
@@ -147,9 +117,15 @@ public:
     /*access methods to the private data*/
     //NOTE: add user protections to check if the various fields have actually been declared or not.
     
-    MatrixXcd geteigenvalues() {return eigenvalues;}
+    //returns the eigenvalues calculated in the last iteration of the FSI as a complex Eigen vector
+    VectorXcd geteigenvalues() {return eigenvalues[eigenvalues.size()-1];}
     
-    Eigen::MatrixXd getresidual(){if (residual_calculated == false){
+    std::vector<VectorXcd>  getalleigenvalues() {return eigenvalues;}
+    
+    //get all eigenvalues in the form of an Eigen Matrix with NAN in the spaces where nothing was calculated
+    MatrixXcd getalleigenvaluesM();
+    
+    std::vector<Eigen::VectorXd> getresiduals(){if (residual_calculated == false){
         throw "residual was not calculated, there is no residual data here";
     } else {
         return residual;
@@ -160,11 +136,21 @@ public:
     
     std::string getSpectralproj_name(){return spectralproj_type;}
     
+    
+    /* various quality of life methods in the usage of the class */
+    
+    void store(std::string path, std::string name);
+    /* stores the contents of the current FSI_data object in folder specified by the path, path as a collection of two files in a folder in the path folder with name, name. The two files are named FSI_data.txt and another file with format given by the particular derived class of Span used*/
+    
+    void load(std::string path, std::string name);
+    /* loads the contents given by the path, (path\name) to the current FSI_data object. Assumes the file structure within the given directory specified is of the format that would be created by using the store method*/
+    
+    
     /* Constructors*/
     
-    FSI_data(MatrixXcd eigenvalues, Span *span, std::string spectralproj_type);
+    FSI_data(std::vector<VectorXcd>  eigenvalues, Span *span, std::string spectralproj_type);
     
-    FSI_data(MatrixXcd eigenvalues, Span *span, std::string spectralproj_type, Eigen::MatrixXd residual);
+    FSI_data(std::vector<VectorXcd> eigenvalues, Span *span, std::string spectralproj_type, std::vector<Eigen::VectorXd> residual);
     
     
     
@@ -196,6 +182,7 @@ public:
     virtual std::string whatareyou() = 0;
     /*Method to on query return string saying what type of spectral projector you are, used to allow more polymorphism behavior in applications*/
     
+    
     //mult corrresponds with the action of the approximate spectral projection operator on a pointer to a Span. Alters the given span object.
     
     virtual void mult (Span *y) = 0;
@@ -207,7 +194,7 @@ public:
     
     //return suitable norms of the residuals A y(:,i) - eigenvalue(i) * y(:,i).
     
-    virtual double residual(MatrixXcd eigs, Span *y) = 0;
+    virtual Eigen::VectorXd residual(VectorXcd eigs, const Span *y) = 0;
     
     // Enrich the given span 'y' by more vectors or somehow with more eigenspace content. Called when FSI restarts after a convergence failure. Must work by altering the original span passed in.
     
@@ -218,7 +205,7 @@ public:
 VectorXcd fsi_step_hermitian(Span *q);
     /* Perform one step of the FSI algorithm  assuming that the operator is self-adjoint. Takes a pointer to a span as an input and returns a  Eigen vector than contains the ritzvalues and edits the given Span object to be the span after the spectral projector has been applied */
     
-    //NOTE: currently implemented with restart
+    //NOTE: currently implemented without restart capability
     FSI_data fsi_hermitian(Span *q, double stop_tol = 1e-9,double eigen_fudge = 1e-9, unsigned int maxiterations = 10, bool report_residuals = false);
     
 };
